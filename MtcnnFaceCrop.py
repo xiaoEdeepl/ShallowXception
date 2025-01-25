@@ -55,11 +55,11 @@ def process_video(video_file, frame_number, confidence, input_folder, output_roo
 
 def process_videos_in_parallel(video_files, input_folder, output_root_folder, frame_number, confidence):
     # 使用多进程处理视频文件
-    with mp.Pool(processes=mp.cpu_count()) as pool:
+    with mp.Pool(processes=8) as pool:
         pool.starmap(process_video, [(video_file, frame_number, confidence, input_folder, output_root_folder) for video_file in video_files])
 
 if __name__ == '__main__':
-    input_folder = 'E:\\dataset\\DFDC\\dfdc_train_part_2'
+    input_folder = 'D:\\dfdc_train_part_2'
     output_root_folder = './dataset/dfdc'
     os.makedirs(output_root_folder, exist_ok=True)
 
@@ -67,6 +67,6 @@ if __name__ == '__main__':
     video_files = [f for f in os.listdir(input_folder) if f.endswith('.mp4')]
 
     # 使用多进程处理所有视频
-    process_videos_in_parallel(video_files, input_folder, output_root_folder, 25, 0.9)
+    process_videos_in_parallel(video_files, input_folder, output_root_folder, 25, 0.95)
 
     print("所有视频处理完成！")

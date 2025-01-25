@@ -80,7 +80,7 @@ def train_process(train_load, val_load, model, epoch_num, learning_rate, model_n
         if val_acc_history[-1] * 100.0 > best_acc * 100.0:
             best_acc = val_acc_history[-1]
             best_model_weight = model.state_dict()
-            torch.save(best_model_weight, './checkpoints/{}.pth'.format(model_name))
+            torch.save(best_model_weight, './weight/{}.pth'.format(model_name))
             print("model updated with accuracy {:.4f}".format(best_acc))
 
     result = pd.DataFrame(data={
@@ -119,7 +119,7 @@ def plt_acc_loss(result, modelname):
     plt.xlabel("epoch")
     plt.ylabel("accuracy")
     plt.grid(True)
-    plt.savefig(unique_filename)
+    plt.savefig(f"./figures/{unique_filename}")
     plt.show()
     print(f"Saved plot as {unique_filename}")
 
@@ -145,20 +145,20 @@ if __name__ == '__main__':
         model = ShallowXception()
         model_name = model.name()
 
-    log_file = f"./{model_name}_logs.csv"
+    log_file = f"./log/{model_name}_logs.csv"
     #选择继续训练则读取checkpoint
     previous_epoch = 0  # 先前训练的epoch数
     if args.c:
         # 读取模型权重
-        model.load_state_dict(torch.load('./checkpoints/{}.pth'.format(model_name)))
+        model.load_state_dict(torch.load('./weight/{}.pth'.format(model_name)))
 
         # 检查并读取日志文件
         if os.path.exists(log_file):
             previous_result = pd.read_csv(log_file)
             previous_epoch = len(previous_result["epoch"])
-            print(f"Loaded existing log file: {log_file}")
+            print(f"Loaded existing log file: ./log/{log_file}")
         else:
-            print(f"No existing log file: {log_file}")
+            print(f"No existing log file: ./log/{log_file}")
             previous_result = None
         print("Continue Training")
     else:
@@ -184,12 +184,12 @@ if __name__ == '__main__':
     # 更新已有的csv或保存新的csv文件
     if previous_result is not None:
         combined_result = pd.concat([previous_result, result], ignore_index=True)
-        combined_result.to_csv(f"./{model_name}_logs.csv", index=False)
-        print(f"Updated log file: {log_file}")
+        combined_result.to_csv(f"./log/{model_name}_logs.csv", index=False)
+        print(f"Updated log file: ./log/{log_file}")
         plt_acc_loss(combined_result, model_name)
     else:
-        result.to_csv(f"./{model_name}_logs.csv", index=False)
-        print(f"Saved log file: {log_file}")
+        result.to_csv(f"./log/{model_name}_logs.csv", index=False)
+        print(f"Saved log file: ./log/{log_file}")
         plt_acc_loss(result, model_name)
 
     # t-SNE可视化

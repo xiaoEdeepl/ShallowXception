@@ -1,8 +1,7 @@
 import torch
 from torch.utils.data import Dataset, DataLoader, random_split
-from torchvision import transforms
 from PIL import Image
-from torchvision import transforms, datasets
+from torchvision import transforms
 import pandas as pd
 import os
 
@@ -114,7 +113,7 @@ def test_data_load():
     batch_size = 20
     dataset_path = './dataset/dfdc'
 
-    testset = dfdc_dataset(dataset_path, './metadata.csv', transform=transformer)
+    testset = dfdc_dataset(dataset_path, 'dataset/dfdc/metadata.csv', transform=transformer)
     print(f'test set length:{len(testset)}')
 
     test_loader = DataLoader(testset, batch_size=batch_size, shuffle=True, num_workers=16)

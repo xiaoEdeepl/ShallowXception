@@ -1,10 +1,2 @@
-/dataset/dfdc/*
-/dataset/FF++/*
-
-!/dataset/dfdc/
-!/dataset/FF++/
-
-/.idea/
-/__pycache__/
-/.pytest_cache/
-
+/dataset/dfdc/
+/dataset/FF++/
