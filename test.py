@@ -22,6 +22,6 @@ def model_test_process(model, test_load):
 
 if __name__ == "__main__":
     model = ShallowXception()
-    model.load_state_dict(torch.load("./checkpoints/ShallowXception.pth", weights_only = False))
-    test_load = test_data_load()
+    model.load_state_dict(torch.load("./weight/ShallowXception.pth", weights_only = False))
+    test_load = test_data_load(8)
     model_test_process(model, test_load)
