@@ -3,12 +3,12 @@ Comparing the Generalization Capability of Original Xception vs. ShallowXception
 
 ### Dataset Dir
 ├─dataset   
-│  ├─dfdc  
-│  └─FF++  
-│      ├─fake  
-│      │  ├─df  
-│      │  ├─f2f  
-│      │  ├─fshift  
-│      │  ├─fswap  
-│      │  └─nt  
-│      └─real  
+│    ├─dfdc  
+│    └─FF++  
+│        ├─fake  
+│        │    ├─df  
+│        │    ├─f2f  
+│        │    ├─fshift  
+│        │    ├─fswap  
+│        │    └─nt  
+│        └─real  
