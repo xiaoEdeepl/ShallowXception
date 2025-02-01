@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt
-from model.model import biXception, ShallowXception
+from model.model import Xception, ShallowXception
 import pandas as pd
 from load_dataset import train_data_load
 import os
@@ -130,7 +130,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="manual to this script")
     parser.add_argument("--c", type=bool, default=False, help="whether to train model by pretrained weight")
     parser.add_argument("--epoch", type=int, default=10, help="number of epochs")
-    parser.add_argument("--model", type=str, default="biXception", help="which model(biXception or ShallowXception) to use")
+    parser.add_argument("--model", type=str, default="Xception", help="which model(Xception or ShallowXception) to use")
     parser.add_argument("--bs", type=int, default=8, help="batch size, default=8")
     parser.add_argument("--lr", type=float, default=1e-4, help="learning rate, default=1e-4")
     parser.add_argument("--v", type=bool, default=False, help="whether to show t-SNE visualization")
@@ -138,8 +138,8 @@ if __name__ == '__main__':
     batch_size = args.bs
 
     # 按照参数初始化模型
-    if args.model == "biXception":
-        model = biXception()
+    if args.model == "Xception":
+        model = Xception()
         model_name = model.name()
     elif args.model == "ShallowXception":
         model = ShallowXception()

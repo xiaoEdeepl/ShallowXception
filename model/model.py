@@ -6,20 +6,21 @@ from pretrainedmodels.models.xception import Block, SeparableConv2d
 
 
 # 定义一个继承自xception的自定义模型
-class biXception(nn.Module):
-    def __init__(self):
-        super(biXception, self).__init__()
+class Xception(nn.Module):
+    def __init__(self, classes=2):
+        super(Xception, self).__init__()
         # 加载xception模型，使用预训练权重
+        self.classes = classes
         self.model = pretrainedmodels.__dict__['xception'](pretrained=False)
 
         # 替换最后的分类头，适应2类分类任务
-        self.model.last_linear = nn.Linear(self.model.last_linear.in_features, 2)
+        self.model.last_linear = nn.Linear(self.model.last_linear.in_features, classes)
 
     def forward(self, x):
         return self.model(x)
 
     def name(self):
-        return "biXception"
+        return "Xception"
 
 
 
