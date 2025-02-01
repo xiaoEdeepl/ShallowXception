@@ -1,5 +1,5 @@
 import torch
-from model.model import biXception, ShallowXception
+from model.model import Xception, ShallowXception
 from load_dataset import test_data_load
 
 def model_test_process(model, test_load):
