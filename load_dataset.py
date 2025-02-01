@@ -109,23 +109,21 @@ def ff_data_load(data_dir, transform):
     return data
 
 
-def test_data_load():
-    batch_size = 20
-    dataset_path = './dataset/dfdc'
+def dfdc_data_load(dataset_path, transformer):
 
-    testset = dfdc_dataset(dataset_path, 'dataset/dfdc/metadata.csv', transform=transformer)
-    print(f'test set length:{len(testset)}')
+    dataset = dfdc_dataset(dataset_path, './metadata.csv', transform=transformer)
+    print(f'test set length:{len(dataset)}')
 
-    test_loader = DataLoader(testset, batch_size=batch_size, shuffle=True, num_workers=16)
-    return test_loader
+    return dataset
 
 
 def train_data_load(bs):
     # 设置路径
-    dataset_path = './dataset/FF++/'  # 根文件夹路径
+    # dataset_path = './dataset/FF++/'  # 根文件夹路径
+    dataset_path = './dataset/dfdc'
     batch_size = bs  # 批量大小
 
-    dataset = ff_data_load(dataset_path, transformer)
+    dataset = dfdc_data_load(dataset_path, transformer)
 
     total_size = len(dataset)
 
@@ -134,9 +132,8 @@ def train_data_load(bs):
 
     train_dataset, valide_dataset = random_split(dataset, [num_train_set, num_valid_set])
 
-    # print(f"标签的样本：{train_dataset.dataset.classes}")
-
     print(f'train set length:{len(train_dataset)}, valid set length:{len(valide_dataset)}')
+
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=8, pin_memory=True)
     valid_loader = DataLoader(valide_dataset, batch_size=batch_size, shuffle=True, num_workers=8, pin_memory=True)
