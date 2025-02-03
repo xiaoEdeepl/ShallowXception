@@ -4,6 +4,7 @@ from PIL import Image
 from torchvision import transforms
 import pandas as pd
 import os
+import torch.nn.functional as F
 
 
 img_size = 299  # 图像大小
@@ -51,7 +52,7 @@ class dfdc_dataset(Dataset):
 
 
 class ff_dataset(Dataset):
-    def __init__(self, data_dir, label_dir, transform, label_dict, classes=5):
+    def __init__(self, data_dir, label_dir, transform, label_dict, classes=6):
         self.data_dir = data_dir
         self.label_dir = label_dir
         self.transform = transform
@@ -87,14 +88,19 @@ class ff_dataset(Dataset):
                 label = 0
             elif self.label_dir == 'real':
                 label = 1
-        elif(self.classes == 5):
+        elif(self.classes == 6):
             label = self.label_dict[self.label_dir]
 
+        # 将图片转为tensor
         img_tensor = self.transform(img)
-        label_tensor = torch.tensor(label)
+
+        # 将标签转为tensor
+        label_tensor = torch.tensor(label, dtype=torch.long)
+        label_tensor = F.one_hot(label_tensor, self.classes).float()
+
         return img_tensor, label_tensor
 
-def ff_data_load(data_dir, transform, classes=5):
+def ff_data_load(data_dir, transform, classes=6):
     label_dict = {'df':0, 'f2f':1, 'fshift':2, 'fswap':3, 'nt':4, 'real':5}
     fake_path = os.path.join(data_dir, 'fake')
     df = ff_dataset(fake_path, 'df', transform, label_dict, classes)
@@ -130,11 +136,12 @@ def test_data_load(bs):
 
 def train_data_load(bs):
     # 设置路径
-    # dataset_path = './dataset/FF++/'  # 根文件夹路径
-    dataset_path = './dataset/dfdc'
+    dataset_path = './dataset/FF++/'  # 根文件夹路径
+    # dataset_path = './dataset/dfdc'
     batch_size = bs  # 批量大小
 
-    dataset = dfdc_data_load(dataset_path, transformer)
+    # dataset = dfdc_data_load(dataset_path, transformer)
+    dataset = ff_data_load(dataset_path, transformer)
 
     total_size = len(dataset)
 

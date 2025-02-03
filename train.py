@@ -28,7 +28,7 @@ def train_process(train_load, val_load, model, epoch_num, learning_rate, model_n
     val_acc_history = []
 
     # t-SNE 可视化参数
-    val_feature = []
+    val_features = []
     val_labels = []
     # t-SNE 可视化参数
     print("================================START TRAINING================================")
@@ -41,43 +41,49 @@ def train_process(train_load, val_load, model, epoch_num, learning_rate, model_n
         val_loss = 0
         val_correct = 0
         val_times = 0
+        # 训练阶段
         for data, label in train_load:
             data, label = data.to(device), label.to(device)
+            # 将 one-hot 标签转换为类别索引
+            target = torch.argmax(label, dim=1)
             model.train()
             output = model.forward(data)
             y_hat = torch.argmax(output, dim=1)
-            loss = criterion(output, label)
+            loss = criterion(output, target)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            train_loss += loss.item() * len(data)
-            train_correct += torch.sum(label == y_hat)
-            train_times += len(data)
+
+            train_loss += loss.item() * data.size(0)
+            train_correct += torch.sum(target == y_hat).item()
+            train_times += data.size(0)
+
+        # 验证阶段
         for data, label in val_load:
             data, label = data.to(device), label.to(device)
+
+            target = torch.argmax(label, dim=1)
+
             model.eval()
             with torch.no_grad():
                 output = model.forward(data)
                 y_hat = torch.argmax(output, dim=1)
-                loss = criterion(output, label)
-                val_loss += loss.item() * len(data)
-                val_correct += torch.sum(label == y_hat)
-                val_times += len(data)
+                loss = criterion(output, target)
 
-                # t-SNE 特征
-                features = model.forward(data).cpu().numpy()
-                val_feature.append(features)
-                val_labels.append(label.cpu().numpy())
-                # t-SNE 特征
+                val_loss += loss.item() * data.size(0)
+                val_correct += torch.sum(target == y_hat).item()
+                val_times += data.size(0)
 
         train_loss_history.append(train_loss / train_times)
         val_loss_history.append(val_loss / val_times)
-        train_acc_history.append((train_correct / train_times).cpu().item())
-        val_acc_history.append((val_correct / val_times).cpu().item())
+        # train_acc_history.append((train_correct / train_times).cpu().item())
+        # val_acc_history.append((val_correct / val_times).cpu().item())
+        train_acc_history.append((train_correct / train_times))
+        val_acc_history.append((val_correct / val_times))
         print("epoch {}, train loss:{:.4f}, train acc:{:.4f}".format(epoch, train_loss_history[-1], train_acc_history[-1]))
         print("epoch {}, val loss:{:.4f}, val acc:{:.4f}".format(epoch, val_loss_history[-1], val_acc_history[-1]))
 
-        if val_acc_history[-1] * 100.0 > best_acc * 100.0:
+        if val_acc_history[-1] > best_acc:
             best_acc = val_acc_history[-1]
             best_model_weight = model.state_dict()
             torch.save(best_model_weight, './weight/{}.pth'.format(model_name))
@@ -93,11 +99,24 @@ def train_process(train_load, val_load, model, epoch_num, learning_rate, model_n
 
     result["epoch"] += previous_epoch
 
-    # t-SNE 特征合并
-    val_feature = np.concatenate(val_feature, axis=0)
+    # 使用最佳模型 t-SNE可视化
+    model.load_state_dict(torch.load(f'./weight/{model_name}.pth'))
+    model.eval()
+
+    with torch.no_grad():
+        for data, label in val_load:
+            data,label = data.to(device), label.to(device)
+            # 提取中间层特征
+            features = model.extract_features(data)
+            features = features.view(features.size(0), -1).cpu().numpy()
+            val_features.append(features)
+            val_labels.append(label.cpu().numpy())
+
+    val_features = np.concatenate(val_features, axis=0)
     val_labels = np.concatenate(val_labels, axis=0)
-    # t-SNE 特征合并
-    return result, val_feature, val_labels
+    val_labels = np.argmax(val_labels, axis=1)
+
+    return result, val_features, val_labels
 
 def plt_acc_loss(result, modelname):
     # 利用时间戳保存文件名
@@ -134,15 +153,17 @@ if __name__ == '__main__':
     parser.add_argument("--bs", type=int, default=8, help="batch size, default=8")
     parser.add_argument("--lr", type=float, default=1e-4, help="learning rate, default=1e-4")
     parser.add_argument("--v", type=bool, default=False, help="whether to show t-SNE visualization")
+    parser.add_argument("--classes", type=int, default=2, help="number of classes, default=2")
     args = parser.parse_args()
     batch_size = args.bs
+    classes = args.classes
 
     # 按照参数初始化模型
     if args.model == "Xception":
         model = Xception()
         model_name = model.name()
     elif args.model == "ShallowXception":
-        model = ShallowXception()
+        model = ShallowXception(num_classes=classes)
         model_name = model.name()
 
     log_file = f"./log/{model_name}_logs.csv"
