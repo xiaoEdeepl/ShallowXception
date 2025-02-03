@@ -1,6 +1,6 @@
 # DeepFake Detection Cross-Dataset Generalization Experiment
 
-## 🎯 Experiment Objective
+## 🎯 **Experiment Objective**
 **Compare the generalization capability between:**
 - **Original Xception** 
 - **Modified ShallowXception** (with Blocks 4-11 removed)
@@ -9,14 +9,23 @@
 - 🏋️ **Train on:** FaceForensics++ (FF++) dataset
 - 🧪 **Test on:** DFDC dataset
 
-## 📂 Dataset Architecture
+## 📂 **Dataset Architecture**
 
-### Root Directory Structure
+### Dataset Directory Structure
 ```text
 dataset/
 ├── dfdc/                    # DFDC test set
-│   ├── video_0.mp4          # 14% real samples
-│   ├── video_1.mp4          # 86% fake samples
+│   ├── video_0              # 14% real samples,86% fake samples
+│   │   ├──frame1.jpg
+│   │   ├──frame2.jpg
+│   │   └──...
+│   │   
+│   ├── video_1              
+│   │   ├──frame1.jpg
+│   │   ├──frame2.jpg
+│   │   └──...
+│   │   
+│   ├── ... 
 │   └── metadata.csv         # Ground truth labels
 │
 └── FF++/                    # FaceForensics++ training set
@@ -28,5 +37,53 @@ dataset/
     │   └── nt/              # NeuralTextures
     │
     └── real/                # 1000 original videos
-
 ```
+
+## 🔬 **Experimental Design**
+
+### 1. **Model Variants**
+| Model          | Backbone Architecture      | Trainable Params | Pretrained |
+|----------------|----------------------------|------------------|------------|
+| Xception       | Original Xception          | 20.8M            | None       |
+| ShallowXception| Xception (Blocks 4-11 removed) | -                | None       |
+
+### 2. **Training Protocol**
+- **Input:** 3x299x299 RGB frames (5 fps sampling from every fake video, 25 fps from every real video)
+- **Optimizer:** Adam (lr=1e-4)
+
+## 📊 **Preliminary Results (FF++ → DFDC)**
+
+### **Cross-Dataset Performance**
+| Model          | ACC on FF++ (%) | ACC on DFDC (%) |
+|----------------|-----------------|-----------------|
+| Xception       | **98.7**        | 51.7            |
+| ShallowXception| 94              | **62.5**        |
+
+## ⚡ **Training**
+
+### 1. **Basic Training Command**   
+```bash  
+  python train.py --model Xception --epoch 20 --bs 16 --lr 1e-4
+```  
+- `--model`: Select model type (`Xception` or `ShallowXception`)  
+- `--epoch`: Total number of epochs  
+- `--bs`: Batch size  
+- `--lr`: Initial learning rate  
+
+### 2. **Arguments**  
+|  Parameter |  Type |  Default | Description                                          |  
+|----------------|----------|---------------|------------------------------------------------------|  
+| `--c`          | bool     | False         | Resume training from checkpoint                      |  
+| `--epoch`      | int      | 10            | Number of epochs                                     |  
+| `--model`      | str      | "Xception"    | Model selection <br> `Xception` or `ShallowXception` |  
+| `--bs`         | int      | 8             | Batch size                                           |  
+| `--lr`         | float    | 1e-4          | Learning rate                                        |  
+| `--v`          | bool     | False         | Enable t-SNE visualization                           |  
+
+### 3. **Output Files**   
+The script generates the following files:  
+1. **Model weights**: Saved in `./weight/` as `<model_name>.pth`  
+2. **Training logs**: Saved in `./log/` as `<model_name>_logs.csv`  
+3. **Loss/Accuracy plots**: Saved in `./figures/` with timestamps  
+4. **t-SNE visualization (optional)**: Saved in `./figures/`  
+
