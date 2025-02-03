@@ -31,6 +31,7 @@ def train_process(train_load, val_load, model, epoch_num, learning_rate, model_n
     val_features = []
     val_labels = []
     # t-SNE 可视化参数
+
     print("================================START TRAINING================================")
     for epoch in range(epoch_num):
         best_acc = 0.0
@@ -74,12 +75,12 @@ def train_process(train_load, val_load, model, epoch_num, learning_rate, model_n
                 val_correct += torch.sum(target == y_hat).item()
                 val_times += data.size(0)
 
-        train_loss_history.append(train_loss / train_times)
-        val_loss_history.append(val_loss / val_times)
+        train_loss_history.append(round(train_loss / train_times, ndigits=4))
+        val_loss_history.append(round(val_loss / val_times, ndigits=4))
         # train_acc_history.append((train_correct / train_times).cpu().item())
         # val_acc_history.append((val_correct / val_times).cpu().item())
-        train_acc_history.append((train_correct / train_times))
-        val_acc_history.append((val_correct / val_times))
+        train_acc_history.append(round(train_correct / train_times, ndigits=4))
+        val_acc_history.append(round(val_correct / val_times, ndigits=4))
         print("epoch {}, train loss:{:.4f}, train acc:{:.4f}".format(epoch, train_loss_history[-1], train_acc_history[-1]))
         print("epoch {}, val loss:{:.4f}, val acc:{:.4f}".format(epoch, val_loss_history[-1], val_acc_history[-1]))
 
@@ -177,9 +178,9 @@ if __name__ == '__main__':
         if os.path.exists(log_file):
             previous_result = pd.read_csv(log_file)
             previous_epoch = len(previous_result["epoch"])
-            print(f"Loaded existing log file: ./log/{log_file}")
+            print(f"Loaded existing log file: {log_file}")
         else:
-            print(f"No existing log file: ./log/{log_file}")
+            print(f"No existing log file: {log_file}")
             previous_result = None
         print("Continue Training")
     else:
@@ -215,7 +216,10 @@ if __name__ == '__main__':
 
     # t-SNE可视化
     if args.v:
-        visualization_with_tsne(val_features, val_labels, model_name)
+        visualization_with_tsne(feature=val_features,
+                                labels=val_labels,
+                                model_name=model_name,
+                                label_dict={'df':0, 'f2f':1, 'fshift':2, 'fswap':3, 'nt':4, 'real':5})
 
 
 
