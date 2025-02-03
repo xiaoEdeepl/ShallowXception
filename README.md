@@ -15,9 +15,17 @@
 ```text
 dataset/
 ├── dfdc/                    # DFDC test set
-│   ├── video_0.mp4          # 14% real samples
-│   ├── video_1.mp4          # 86% fake samples
-│   ├── ...... 
+│   ├── video_0              # 14% real samples,86% fake samples
+│   │   ├──frame1.jpg
+│   │   ├──frame2.jpg
+│   │   ├──...
+│   │   
+│   ├── video_1              
+│   │   ├──frame1.jpg
+│   │   ├──frame2.jpg
+│   │   ├──...
+│   │   
+│   ├── ... 
 │   └── metadata.csv         # Ground truth labels
 │
 └── FF++/                    # FaceForensics++ training set
