@@ -14,10 +14,10 @@
 ### Root Directory Structure
 ```text
 dataset/
-├── dfdc/                     # DFDC test set
-│   ├── video_0.mp4          # 50% real samples
-│   ├── video_1.mp4          # 50% fake samples
-│   └── metadata.json        # Ground truth labels
+├── dfdc/                    # DFDC test set
+│   ├── video_0.mp4          # 14% real samples
+│   ├── video_1.mp4          # 86% fake samples
+│   └── metadata.csv         # Ground truth labels
 │
 └── FF++/                    # FaceForensics++ training set
     ├── fake/                # 1000 manipulated videos per method
@@ -28,4 +28,4 @@ dataset/
     │   └── nt/              # NeuralTextures
     │
     └── real/                # 1000 original videos
-        └── youtube/         # Sourced from YouTube
+
