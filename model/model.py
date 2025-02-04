@@ -3,6 +3,7 @@ import torch.nn.functional as F
 import torch.nn as nn
 # from keras.src.applications.xception import Xception
 from pretrainedmodels.models.xception import Block, SeparableConv2d
+from pyexpat import features
 
 
 # 定义一个继承自xception的自定义模型
@@ -21,6 +22,38 @@ class Xception(nn.Module):
 
     def name(self):
         return "Xception"
+
+    def extract_features(self, x):
+        x = self.conv1(input)
+        x = self.bn1(x)
+        x = self.relu(x)
+
+        x = self.conv2(x)
+        x = self.bn2(x)
+        x = self.relu(x)
+
+        x = self.block1(x)
+        x = self.block2(x)
+        x = self.block3(x)
+        x = self.block4(x)
+        x = self.block5(x)
+        x = self.block6(x)
+        x = self.block7(x)
+        x = self.block8(x)
+        x = self.block9(x)
+        x = self.block10(x)
+        x = self.block11(x)
+        x = self.block12(x)
+
+        x = self.conv3(x)
+        x = self.bn3(x)
+        x = self.relu(x)
+
+        x = self.conv4(x)
+        x = self.bn4(x)
+        x = self.relu(x)
+
+        return x
 
 
 
@@ -75,6 +108,11 @@ class ShallowXception(nn.Module):
         #         m.weight.data.fill_(1)
         #         m.bias.data.zero_()
         # #-----------------------------
+    # 提取全局平均池化前的特征，用于t-SNE可视化
+    def extract_features(self, input):
+        features = self.features(input)
+        features = self.relu(features)
+        return features
 
     def features(self, input):
         x = self.conv1(input)

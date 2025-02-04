@@ -10,7 +10,7 @@ import os
 
 os.environ["LOKY_MAX_CPU_COUNT"] = "16"
 
-def visualization_with_tsne(feature, labels, model_name, save=True, label_dict = None):
+def visualization_with_tsne(feature, labels, model_name, label_dict, save=True):
     timestamp = time.strftime("%Y%m%d-%H%M%S")
     filename = f"./figures/{model_name}_tsne_{timestamp}.png"
 
@@ -24,17 +24,24 @@ def visualization_with_tsne(feature, labels, model_name, save=True, label_dict =
     cmap = plt.cm.get_cmap("tab10")
     colors = [cmap(i/len(unique_labels)) for i in range(len(unique_labels))]
 
+    # 创建反向字典（数值到类别名称）
+    reverse_dict = {v: k for k, v in label_dict.items()} if label_dict else None
+
     for i, label in enumerate(unique_labels):
-        idx = labels ==label
+        idx = labels == label
+        # 根据 label_dict 动态获取类名
+        class_name = reverse_dict.get(label, str(label)) if reverse_dict else f"Class {label}"
+
         plt.scatter(
             reduce_features[idx, 0],
             reduce_features[idx, 1],
             color=colors[i],
-            label=f"Class {label}",
+            label=class_name,  # 直接显示类名
             alpha=0.6,
             edgecolors="w",
             linewidths=0.5
         )
+
     plt.legend(
         title="Classes",
         bbox_to_anchor=(1.05, 1),

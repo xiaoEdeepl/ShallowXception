@@ -21,7 +21,7 @@ def model_test_process(model, test_load):
     print("测试了{}次，正确率为{:.4f}%".format(test_times, (test_correct / test_times)*100))
 
 if __name__ == "__main__":
-    model = ShallowXception()
-    model.load_state_dict(torch.load("./weight/ShallowXception.pth", weights_only = False))
+    model = ShallowXception(num_classes=6)
+    model.load_state_dict(torch.load("./weight/ShallowXception.pth", weights_only = True))
     test_load = test_data_load(bs=8)
     model_test_process(model, test_load)
