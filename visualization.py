@@ -88,5 +88,6 @@ if __name__ == "__main__":
         feature=val_features,
         labels=val_labels,
         model_name="ShallowXception",
-        save=False
+        save=False,
+        label_dict={'df': 0, 'f2f': 1, 'fshift': 2, 'fswap': 3, 'nt': 4, 'real': 5}
     )

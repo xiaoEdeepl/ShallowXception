@@ -125,11 +125,11 @@ def dfdc_data_load(dataset_path, transformer):
 
     return dataset
 
-def test_data_load(bs):
+def test_data_load(bs, classes=2):
     dataset_path = './dataset/FF++'
     batch_size = bs
 
-    dataset = ff_data_load(dataset_path, transformer, 2)
+    dataset = ff_data_load(dataset_path, transformer, classes)
     test_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=8, pin_memory=True)
 
     return test_loader

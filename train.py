@@ -32,10 +32,12 @@ def train_process(train_load, val_load, model, epoch_num, learning_rate, model_n
     val_labels = []
     # t-SNE 可视化参数
     best_acc = 0.0
+    # best_model_weight = model.state_dict()
+
     print("================================START TRAINING================================")
 
     for epoch in range(epoch_num):
-        best_model_weight = model.state_dict()
+
         train_loss = 0
         train_correct = 0
         train_times = 0
@@ -48,7 +50,7 @@ def train_process(train_load, val_load, model, epoch_num, learning_rate, model_n
             # 将 one-hot 标签转换为类别索引
             target = torch.argmax(label, dim=1)
             model.train()
-            output = model.forward(data)
+            output = model(data)
             y_hat = torch.argmax(output, dim=1)
             loss = criterion(output, target)
             optimizer.zero_grad()
@@ -67,7 +69,7 @@ def train_process(train_load, val_load, model, epoch_num, learning_rate, model_n
 
             model.eval()
             with torch.no_grad():
-                output = model.forward(data)
+                output = model(data)
                 y_hat = torch.argmax(output, dim=1)
                 loss = criterion(output, target)
 
