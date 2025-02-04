@@ -18,7 +18,7 @@ def train_process(train_load, val_load, model, epoch_num, learning_rate, model_n
     print(f'{device} is available')
     print("training model [{}]".format(model_name))
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=1e-5)
     criterion = nn.CrossEntropyLoss()
     model = model.to(device)
 
@@ -31,10 +31,10 @@ def train_process(train_load, val_load, model, epoch_num, learning_rate, model_n
     val_features = []
     val_labels = []
     # t-SNE 可视化参数
-
+    best_acc = 0.0
     print("================================START TRAINING================================")
+
     for epoch in range(epoch_num):
-        best_acc = 0.0
         best_model_weight = model.state_dict()
         train_loss = 0
         train_correct = 0
@@ -119,7 +119,7 @@ def train_process(train_load, val_load, model, epoch_num, learning_rate, model_n
 
     return result, val_features, val_labels
 
-def plt_acc_loss(result, modelname):
+def plt_acc_loss(result, modelname:str):
     # 利用时间戳保存文件名
     timestamp = time.strftime("%Y%m%d_%H%M%S")
     unique_filename = f"{modelname}_{timestamp}_acc_loss.png"
