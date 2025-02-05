@@ -1,3 +1,4 @@
+import cv2
 import torch
 from torch.utils.data import Dataset, DataLoader, random_split
 from PIL import Image
@@ -13,6 +14,53 @@ transformer = transforms.Compose([
         transforms.ToTensor(),  # 转换为张量
         transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])  # 标准化
     ])
+
+class celebdf_dataset(Dataset):
+    def __init__(self,  root_dir, transform=None):
+        self.root_dir = root_dir
+        self.filelist = []
+        self.transform = transform
+
+        label_dir = os.listdir(root_dir)
+        real_name_path = root_dir + '/' + label_dir[0]
+        synthesis_name_path = root_dir + '/' + label_dir[1]
+
+        real_videos = os.listdir(real_name_path)
+        synthesis_videos = os.listdir(synthesis_name_path)
+
+        for real_video in real_videos:
+            video_name_path = real_name_path + '/' + real_video
+            frames = os.listdir(video_name_path)
+            for frame in frames:
+                frame_path = video_name_path + '/' + frame
+                self.filelist.append(frame_path)
+
+        for synthesis_video in synthesis_videos:
+            video_name_path = synthesis_name_path + '/' + synthesis_video
+            frames = os.listdir(video_name_path)
+            for frame in frames:
+                frame_path = video_name_path + '/' + frame
+                self.filelist.append(frame_path)
+
+    def __len__(self):
+        return len(self.filelist)
+
+    def __getitem__(self, idx):
+        frame_path = self.filelist[idx]
+        frame = Image.open(frame_path)
+        label_temp = frame_path.split('/')[-3]
+        # print(label_temp)
+        if label_temp == 'real':
+            label = 1
+        else:
+            label = 0
+        tensor_frame = self.transform(frame)
+        tensor_label = torch.tensor(label)
+
+        tensor_label_onehot = F.one_hot(tensor_label).float()
+
+        return tensor_frame, tensor_label_onehot
+
 
 class dfdc_dataset(Dataset):
     def __init__(self, data_dir, metadata_dir, transform):
@@ -125,7 +173,7 @@ def dfdc_data_load(dataset_path, transformer):
 
     return dataset
 
-def test_data_load(bs, classes=2):
+def Test_data_load(bs, classes=2):
     dataset_path = './dataset/FF++'
     batch_size = bs
 
@@ -159,3 +207,7 @@ def train_data_load(bs):
     return train_loader, valid_loader
 
 
+if __name__ == "__main__":
+    celebdf = celebdf_dataset("./dataset/celebdf", transform=transformer)
+    img = celebdf[0]
+    print(img)
