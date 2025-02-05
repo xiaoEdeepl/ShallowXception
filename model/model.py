@@ -20,6 +20,9 @@ class Xception(nn.Module):
     def forward(self, x):
         return self.model(x)
 
+    def classes(self):
+        return self.classes
+
     def name(self):
         return "Xception"
 
@@ -159,6 +162,9 @@ class ShallowXception(nn.Module):
 
     def name(self):
         return "ShallowXception"
+
+    def classes(self):
+        return self.num_classes
 
 
 if __name__ == '__main__':

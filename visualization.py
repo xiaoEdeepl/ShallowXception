@@ -10,6 +10,30 @@ import os
 
 os.environ["LOKY_MAX_CPU_COUNT"] = "16"
 
+def plt_acc_loss(result, modelname:str):
+    # 利用时间戳保存文件名
+    timestamp = time.strftime("%Y%m%d_%H%M%S")
+    unique_filename = f"{modelname}_{timestamp}_acc_loss.png"
+
+    # 绘图
+    plt.figure(figsize=(12, 4))
+    plt.subplot(1, 2, 1)
+    plt.plot(result["epoch"], result.train_loss_history, 'ro-', label="train loss")
+    plt.plot(result["epoch"], result.val_loss_history, 'bs-', label="val loss")
+    plt.legend()
+    plt.xlabel("epoch")
+    plt.ylabel("loss")
+    plt.subplot(1, 2, 2)
+    plt.plot(result["epoch"], result.train_acc_history, 'ro-', label="train acc")
+    plt.plot(result["epoch"], result.val_acc_history, 'bs-', label="val acc")
+    plt.legend()
+    plt.xlabel("epoch")
+    plt.ylabel("accuracy")
+    plt.grid(True)
+    plt.savefig(f"./figures/{unique_filename}")
+    plt.show()
+    print(f"Saved plot as {unique_filename}")
+
 def visualization_with_tsne(feature, labels, model_name, label_dict, save=True):
     timestamp = time.strftime("%Y%m%d-%H%M%S")
     filename = f"./figures/{model_name}_tsne_{timestamp}.png"

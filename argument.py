@@ -1,5 +1,6 @@
 import argparse
 
+
 def parse_arguments():
     # 参数解析
     parser = argparse.ArgumentParser(description="manual to this script")

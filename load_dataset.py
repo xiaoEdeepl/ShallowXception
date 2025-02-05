@@ -55,12 +55,11 @@ class celebdf_dataset(Dataset):
         else:
             label = 0
         tensor_frame = self.transform(frame)
-        tensor_label = torch.tensor(label)
+        tensor_label = torch.tensor(label, dtype=torch.long)
 
-        tensor_label_onehot = F.one_hot(tensor_label).float()
+        tensor_label_onehot = F.one_hot(tensor_label, num_classes=2).float()
 
         return tensor_frame, tensor_label_onehot
-
 
 class dfdc_dataset(Dataset):
     def __init__(self, data_dir, metadata_dir, transform):
@@ -97,7 +96,6 @@ class dfdc_dataset(Dataset):
             label = 1
         tensor_label = torch.tensor(label)
         return img, tensor_label
-
 
 class ff_dataset(Dataset):
     def __init__(self, data_dir, label_dir, transform, label_dict, classes=6):
@@ -165,7 +163,6 @@ def ff_data_load(data_dir, transform, classes=6):
 
     return data
 
-
 def dfdc_data_load(dataset_path, transformer):
 
     dataset = dfdc_dataset(dataset_path, './metadata.csv', transform=transformer)
@@ -184,12 +181,14 @@ def Test_data_load(bs, classes=2):
 
 def train_data_load(bs):
     # 设置路径
-    dataset_path = './dataset/FF++/'  # 根文件夹路径
+    # dataset_path = './dataset/FF++/'
     # dataset_path = './dataset/dfdc'
+    dataset_path = './dataset/celebdf/'
     batch_size = bs  # 批量大小
 
     # dataset = dfdc_data_load(dataset_path, transformer)
-    dataset = ff_data_load(dataset_path, transformer)
+    # dataset = ff_data_load(dataset_path, transformer)
+    dataset = celebdf_dataset(dataset_path, transformer)
 
     total_size = len(dataset)
 
