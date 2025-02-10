@@ -63,9 +63,9 @@ dataset/
 
 ### 1. **Basic Training Command**   
 ```bash  
-  python train.py --model Xception --epoch 20 --bs 16 --lr 1e-4
+  python train.py --model xception --epoch 20 --bs 16 --lr 1e-4
 ```  
-- `--model`: Select model type (`Xception` or `ShallowXception`)  
+- `--model`: Select model type (`xception` or `shallowxception`)  
 - `--epoch`: Total number of epochs  
 - `--bs`: Batch size  
 - `--lr`: Initial learning rate  
