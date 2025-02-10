@@ -73,12 +73,13 @@ dataset/
 ### 2. **Arguments**  
 |  Parameter |  Type |  Default | Description                                          |  
 |----------------|----------|---------------|------------------------------------------------------|  
-| `--c`          | bool     | False         | Resume training from checkpoint                      |  
+| `--c`          |    -     |     -         | Resume training from checkpoint                      |  
 | `--epoch`      | int      | 10            | Number of epochs                                     |  
 | `--model`      | str      | "Xception"    | Model selection <br> `Xception` or `ShallowXception` |  
 | `--bs`         | int      | 8             | Batch size                                           |  
 | `--lr`         | float    | 1e-4          | Learning rate                                        |  
-| `--v`          | bool     | False         | Enable t-SNE visualization                           |  
+| `--v`          |    -     |     -         | Enable t-SNE visualization                           |
+|`--dataset`     |  str     |    ff         |train dataset (ff, dfdc, cdf)                         |
 
 ### 3. **Output Files**   
 The script generates the following files:  
