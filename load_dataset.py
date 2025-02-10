@@ -57,9 +57,9 @@ class celebdf_dataset(Dataset):
         tensor_frame = self.transform(frame)
         tensor_label = torch.tensor(label, dtype=torch.long)
 
-        tensor_label_onehot = F.one_hot(tensor_label, num_classes=2).float()
+        # tensor_label_onehot = F.one_hot(tensor_label, num_classes=2).float()
 
-        return tensor_frame, tensor_label_onehot
+        return tensor_frame, tensor_label
 
 class dfdc_dataset(Dataset):
     def __init__(self, data_dir, metadata_dir, transform):
@@ -94,17 +94,16 @@ class dfdc_dataset(Dataset):
             label = 0
         else:
             label = 1
-        tensor_label = torch.tensor(label)
+        tensor_label = torch.tensor(label, dtype=torch.long)
         return img, tensor_label
 
 class ff_dataset(Dataset):
-    def __init__(self, data_dir, label_dir, transform, label_dict, classes=6):
+    def __init__(self, data_dir, label_dir, transform, label_dict):
         self.data_dir = data_dir
         self.label_dir = label_dir
         self.transform = transform
         self.label_dict = label_dict
         self.file_list = []
-        self.classes = classes
         if self.label_dir in ('df', 'f2f', 'fshift', 'fswap', 'nt', 'fake'):
             self.method_path = os.path.join(self.data_dir, self.label_dir)
             video_name_list = os.listdir(self.method_path)
@@ -129,35 +128,32 @@ class ff_dataset(Dataset):
         img_path = self.file_list[idx]
         img = Image.open(img_path)
 
-        if(self.classes == 2):
-            if self.label_dir in ('df', 'f2f', 'fshift', 'fswap', 'nt', 'fake'):
-                label = 0
-            elif self.label_dir == 'real':
-                label = 1
-        elif(self.classes == 6):
-            label = self.label_dict[self.label_dir]
+        if self.label_dir in ('df', 'f2f', 'fshift', 'fswap', 'nt', 'fake'):
+            label = 0
+        elif self.label_dir == 'real':
+            label = 1
 
         # 将图片转为tensor
         img_tensor = self.transform(img)
 
         # 将标签转为tensor
         label_tensor = torch.tensor(label, dtype=torch.long)
-        label_tensor = F.one_hot(label_tensor, self.classes).float()
+        # label_tensor = F.one_hot(label_tensor, self.classes).float()
 
         return img_tensor, label_tensor
 
-def ff_data_load(data_dir, transform, classes=6):
+def ff_data_load(data_dir, transform):
     label_dict = {'df':0, 'f2f':1, 'fshift':2, 'fswap':3, 'nt':4, 'real':5}
     fake_path = os.path.join(data_dir, 'fake')
-    df = ff_dataset(fake_path, 'df', transform, label_dict, classes)
-    f2f = ff_dataset(fake_path, 'f2f', transform, label_dict, classes)
-    fshift = ff_dataset(fake_path, 'fshift', transform, label_dict, classes)
-    fswap = ff_dataset(fake_path, 'fswap', transform, label_dict, classes)
-    nt = ff_dataset(fake_path, 'nt', transform, label_dict, classes)
+    df = ff_dataset(fake_path, 'df', transform, label_dict)
+    f2f = ff_dataset(fake_path, 'f2f', transform, label_dict)
+    fshift = ff_dataset(fake_path, 'fshift', transform, label_dict)
+    fswap = ff_dataset(fake_path, 'fswap', transform, label_dict)
+    nt = ff_dataset(fake_path, 'nt', transform, label_dict)
     fake = df + f2f + fshift + fswap + nt
     print("标签为[fake]的数据有{}".format(fake.__len__()))
 
-    real = ff_dataset(data_dir, 'real', transform, label_dict, classes)
+    real = ff_dataset(data_dir, 'real', transform, label_dict)
     print("标签为[real]的数据有{}".format(real.__len__()))
     data = fake + real
 
@@ -174,21 +170,28 @@ def Test_data_load(bs, classes=2):
     dataset_path = './dataset/FF++'
     batch_size = bs
 
-    dataset = ff_data_load(dataset_path, transformer, classes)
-    test_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=8, pin_memory=True)
+    dataset = ff_data_load(dataset_path, transformer)
+    total = len(dataset)
+    test_data_len = round(total * 0.1)
+    drop_len = total - test_data_len
+    test_data,_ = random_split(dataset, [test_data_len, drop_len])
+    print(f'测试集长度:{len(test_data)}')
+    test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=True, num_workers=8, pin_memory=True)
 
     return test_loader
 
-def train_data_load(bs):
+def train_data_load(bs, set):
     # 设置路径
-    # dataset_path = './dataset/FF++/'
-    # dataset_path = './dataset/dfdc'
-    dataset_path = './dataset/celebdf/'
+    if set == "ff":
+        dataset_path = './dataset/FF++/'
+        dataset = ff_data_load(dataset_path, transformer)
+    elif set == "dfdc":
+        dataset_path = './dataset/dfdc'
+        dataset = dfdc_data_load(dataset_path, transformer)
+    elif set == "cdf":
+        dataset_path = './dataset/celebdf/'
+        dataset = celebdf_dataset(dataset_path, transformer)
     batch_size = bs  # 批量大小
-
-    # dataset = dfdc_data_load(dataset_path, transformer)
-    # dataset = ff_data_load(dataset_path, transformer)
-    dataset = celebdf_dataset(dataset_path, transformer)
 
     total_size = len(dataset)
 

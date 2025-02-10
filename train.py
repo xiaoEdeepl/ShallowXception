@@ -2,17 +2,16 @@
 import numpy as np
 import torch
 import torch.nn as nn
-import matplotlib.pyplot as plt
 import pandas as pd
 import os
 import time
-
 from sklearn.metrics import roc_auc_score
 from sklearn.preprocessing import label_binarize
+import torch.nn.functional as F
 
 # 自定义模块
 from argument import parse_arguments
-from model.model import Xception, ShallowXception
+from model.model import shallowxception, xception
 from load_dataset import train_data_load
 from visualization import visualization_with_tsne, plt_acc_loss
 
@@ -32,7 +31,7 @@ def train_process(train_load, val_load, model, epoch_num, learning_rate, model_n
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=wd)
     criterion = nn.CrossEntropyLoss()
     model = model.to(device)
-    num_classes = model.classes()
+    num_classes = model.num_classes
 
     train_loss_history = []
     train_acc_history = []
@@ -47,7 +46,7 @@ def train_process(train_load, val_load, model, epoch_num, learning_rate, model_n
     best_acc = 0.0
     # best_model_weight = model.state_dict()
 
-    print("================================START TRAINING================================")
+    print("====================================================START  TRAINING====================================================")
 
     for epoch in range(epoch_num):
         start_time = time.time()
@@ -62,17 +61,17 @@ def train_process(train_load, val_load, model, epoch_num, learning_rate, model_n
         for data, label in train_load:
             data, label = data.to(device), label.to(device)
             # 将 one-hot 标签转换为类别索引
-            target = torch.argmax(label, dim=1)
+            # target = torch.argmax(label, dim=1)
             model.train()
             output = model(data)
             y_hat = torch.argmax(output, dim=1)
-            loss = criterion(output, target)
+            loss = criterion(output, label)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
 
             train_loss += loss.item() * data.size(0)
-            train_correct += torch.sum(target == y_hat).item()
+            train_correct += torch.sum(label == y_hat).item()
             train_times += data.size(0)
 
         # 验证阶段
@@ -82,15 +81,15 @@ def train_process(train_load, val_load, model, epoch_num, learning_rate, model_n
         with torch.no_grad():
             for data, label in val_load:
                 data, label = data.to(device), label.to(device)
-                target = torch.argmax(label, dim=1)
+                # target = torch.argmax(label, dim=1)
 
                 output = model(data)
                 y_hat = torch.argmax(output, dim=1)
                 probs = torch.softmax(output, dim=1)
-                loss = criterion(output, target)
+                loss = criterion(output, label)
 
                 val_loss += loss.item() * data.size(0)
-                val_correct += torch.sum(target == y_hat).item()
+                val_correct += torch.sum(label == y_hat).item()
                 val_times += data.size(0)
 
                 all_labels.append(label.cpu().numpy())
@@ -98,9 +97,9 @@ def train_process(train_load, val_load, model, epoch_num, learning_rate, model_n
 
             all_probs = np.concatenate(all_probs, axis=0)
             all_labels = np.concatenate(all_labels, axis=0)
-            all_labels_onehot = label_binarize(all_labels, classes=list(range(num_classes)))
+            # all_labels_onehot = label_binarize(all_labels, classes=list(range(num_classes)))
 
-            auc = roc_auc_score(all_labels_onehot, all_probs, multi_class='ovr')
+            auc = roc_auc_score(all_labels, all_probs[:, 1], multi_class='ovr')
             val_auc_history.append(auc)
 
         epoch_time = time.time() - start_time
@@ -131,6 +130,7 @@ def train_process(train_load, val_load, model, epoch_num, learning_rate, model_n
         "val_loss_history":val_loss_history,
         "train_acc_history":train_acc_history,
         "val_acc_history":val_acc_history,
+        "val_auc_history":val_auc_history
     })
 
     result["epoch"] += previous_epoch
@@ -143,14 +143,17 @@ def train_process(train_load, val_load, model, epoch_num, learning_rate, model_n
         for data, label in val_load:
             data,label = data.to(device), label.to(device)
             # 提取中间层特征
-            features = model.extract_features(data)
+            features = model.features(data)
+            # features = nn.ReLU()(features)
+            features = F.relu(features)
+            # 特征展平
             features = features.view(features.size(0), -1).cpu().numpy()
             val_features.append(features)
             val_labels.append(label.cpu().numpy())
 
     val_features = np.concatenate(val_features, axis=0)
     val_labels = np.concatenate(val_labels, axis=0)
-    val_labels = np.argmax(val_labels, axis=1)
+    # val_labels = np.argmax(val_labels, axis=1)
 
     return result, val_features, val_labels
 
@@ -163,14 +166,16 @@ if __name__ == '__main__':
     wd = args.wd
     num_epochs = args.epoch
     lr = args.lr
+    set = args.dataset
 
     model_name = ""
+    model = nn.Module
     # 按照参数初始化模型
-    if args.model == "Xception":
-        model = Xception()
+    if args.model == "xception":
+        model = xception()
         model_name = model.name()
-    elif args.model == "ShallowXception":
-        model = ShallowXception(num_classes=classes)
+    elif args.model == "shallowxception":
+        model = shallowxception(num_classes=classes)
         model_name = model.name()
 
     log_file = f"./log/{model_name}_logs.csv"
@@ -194,7 +199,7 @@ if __name__ == '__main__':
 
 
     # 读取数据集
-    train_load, val_load = train_data_load(batch_size)
+    train_load, val_load = train_data_load(batch_size, set)
     # 训练
     result, val_features, val_labels = train_process(
         train_load,

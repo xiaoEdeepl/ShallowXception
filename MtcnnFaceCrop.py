@@ -59,14 +59,14 @@ def process_videos_in_parallel(video_files, input_folder, output_root_folder, fr
         pool.starmap(process_video, [(video_file, frame_number, confidence, input_folder, output_root_folder) for video_file in video_files])
 
 if __name__ == '__main__':
-    input_folder = 'D:\\dfdc_train_part_2'
-    output_root_folder = './dataset/dfdc'
+    input_folder = 'E:\\dataset\\celebdf\\Celeb-real'
+    output_root_folder = './dataset/celebdf/real'
     os.makedirs(output_root_folder, exist_ok=True)
 
     # 过滤出视频文件，确保是有效的格式
     video_files = [f for f in os.listdir(input_folder) if f.endswith('.mp4')]
 
     # 使用多进程处理所有视频
-    process_videos_in_parallel(video_files, input_folder, output_root_folder, 25, 0.95)
+    process_videos_in_parallel(video_files, input_folder, output_root_folder, 95, 0.95)
 
     print("所有视频处理完成！")

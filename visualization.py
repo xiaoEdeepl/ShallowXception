@@ -3,7 +3,8 @@ from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
 import numpy as np
 import time
-from model.model import Xception, ShallowXception
+from model.model import shallowxception, xception
+
 import torch
 from load_dataset import train_data_load
 import os
@@ -85,8 +86,8 @@ def visualization_with_tsne(feature, labels, model_name, label_dict, save=True):
     plt.close()
 
 if __name__ == "__main__":
-    model = ShallowXception(num_classes=6)
-    model.load_state_dict(torch.load("./weight/ShallowXception.pth"))
+    model = shallowxception()
+    model.load_state_dict(torch.load("weight/shallowxception.pth"))
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
@@ -111,7 +112,7 @@ if __name__ == "__main__":
     visualization_with_tsne(
         feature=val_features,
         labels=val_labels,
-        model_name="ShallowXception",
+        model_name="shallowxception",
         save=False,
-        label_dict={'df': 0, 'f2f': 1, 'fshift': 2, 'fswap': 3, 'nt': 4, 'real': 5}
+        label_dict={'fake': 0, 'real': 1}
     )
