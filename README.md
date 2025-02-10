@@ -75,7 +75,7 @@ dataset/
 |----------------|----------|---------------|------------------------------------------------------|  
 | `--c`          |    -     |     -         | Resume training from checkpoint                      |  
 | `--epoch`      | int      | 10            | Number of epochs                                     |  
-| `--model`      | str      | "Xception"    | Model selection <br> `Xception` or `ShallowXception` |  
+| `--model`      | str      | "xception"    | Model selection <br> `xception` or `shallowxception` |  
 | `--bs`         | int      | 8             | Batch size                                           |  
 | `--lr`         | float    | 1e-4          | Learning rate                                        |  
 | `--v`          |    -     |     -         | Enable t-SNE visualization                           |
